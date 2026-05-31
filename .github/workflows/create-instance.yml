@@ -20,32 +20,39 @@ jobs:
         run: |
           printf '%s' "$OCI_PRIVATE_KEY" > /home/runner/oci_private_key.pem
           chmod 600 /home/runner/oci_private_key.pem
-          echo "Key file size:"
           wc -c /home/runner/oci_private_key.pem
-          echo "Key file first line:"
           head -1 /home/runner/oci_private_key.pem
       - name: Create .env file
+        env:
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
+          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
+          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
+          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          OCI_OCPUS: ${{ secrets.OCI_OCPUS }}
+          OCI_MEMORY_IN_GBS: ${{ secrets.OCI_MEMORY_IN_GBS }}
+          OCI_SHAPE: ${{ secrets.OCI_SHAPE }}
+          OCI_MAX_INSTANCES: ${{ secrets.OCI_MAX_INSTANCES }}
+          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
         run: |
-          cat > .env << EOF
-OCI_REGION=${{ secrets.OCI_REGION }}
-OCI_USER_ID=${{ secrets.OCI_USER_ID }}
-OCI_TENANCY_ID=${{ secrets.OCI_TENANCY_ID }}
-OCI_KEY_FINGERPRINT=${{ secrets.OCI_KEY_FINGERPRINT }}
-OCI_PRIVATE_KEY_FILENAME=/home/runner/oci_private_key.pem
-OCI_SUBNET_ID=${{ secrets.OCI_SUBNET_ID }}
-OCI_IMAGE_ID=${{ secrets.OCI_IMAGE_ID }}
-OCI_OCPUS=${{ secrets.OCI_OCPUS }}
-OCI_MEMORY_IN_GBS=${{ secrets.OCI_MEMORY_IN_GBS }}
-OCI_SHAPE=${{ secrets.OCI_SHAPE }}
-OCI_MAX_INSTANCES=${{ secrets.OCI_MAX_INSTANCES }}
-OCI_SSH_PUBLIC_KEY="${{ secrets.OCI_SSH_PUBLIC_KEY }}"
-OCI_AVAILABILITY_DOMAIN=${{ secrets.OCI_AVAILABILITY_DOMAIN }}
-CACHE_AVAILABILITY_DOMAINS=1
-EOF
+          printf 'OCI_REGION=%s\n' "$OCI_REGION" >> .env
+          printf 'OCI_USER_ID=%s\n' "$OCI_USER_ID" >> .env
+          printf 'OCI_TENANCY_ID=%s\n' "$OCI_TENANCY_ID" >> .env
+          printf 'OCI_KEY_FINGERPRINT=%s\n' "$OCI_KEY_FINGERPRINT" >> .env
+          printf 'OCI_PRIVATE_KEY_FILENAME=/home/runner/oci_private_key.pem\n' >> .env
+          printf 'OCI_SUBNET_ID=%s\n' "$OCI_SUBNET_ID" >> .env
+          printf 'OCI_IMAGE_ID=%s\n' "$OCI_IMAGE_ID" >> .env
+          printf 'OCI_OCPUS=%s\n' "$OCI_OCPUS" >> .env
+          printf 'OCI_MEMORY_IN_GBS=%s\n' "$OCI_MEMORY_IN_GBS" >> .env
+          printf 'OCI_SHAPE=%s\n' "$OCI_SHAPE" >> .env
+          printf 'OCI_MAX_INSTANCES=%s\n' "$OCI_MAX_INSTANCES" >> .env
+          printf 'OCI_SSH_PUBLIC_KEY="%s"\n' "$OCI_SSH_PUBLIC_KEY" >> .env
+          printf 'OCI_AVAILABILITY_DOMAIN=%s\n' "$OCI_AVAILABILITY_DOMAIN" >> .env
+          printf 'CACHE_AVAILABILITY_DOMAINS=1\n' >> .env
       - name: Debug .env
-        run: |
-          echo "=== .env contents (masked) ==="
-          grep -v "KEY\|SECRET\|PRIVATE" .env || true
+        run: grep -v "KEY\|SECRET\|PRIVATE" .env || true
       - name: Try to create instance
         run: php index.php || echo "PHP exited with code $?"
         continue-on-error: true
