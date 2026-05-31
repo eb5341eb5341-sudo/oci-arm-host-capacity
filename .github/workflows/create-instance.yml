@@ -1,4 +1,3 @@
-# updated
 name: Create OCI Instance
 on:
   schedule:
